@@ -1,110 +1,49 @@
-<?php
-$username = "Maximus";
-echo $username;
-$current = $username;
-echo "<br>";
-echo $current;
-echo "<br>";
-$current = 15;
-echo "current is now " . $current;
-$i = 0;
-$j = 10;
-echo "<br>";
-if($i-- == 0){
-	echo $i;
-}
-echo "<br>";
-
-$author = "Brian W. Kernighan";
-echo <<<_END
-Debugging is twice as hard as writing the code in the first place.
-Therefore, if you write the code as cleverly as possible, you are,
-by definition, not smart enough to debug it.
-- $author.
-_END;
-echo "<br>";
-$number = 12345 * 67890;
-echo substr($number, 3, 4);
-echo "<br>";
-echo "This is line " . __LINE__ . " of file " . __FILE__;
-echo "<br>";
-function longdate($timestamp)
-{
-return date("l jS", $timestamp);
-}
-echo longdate(time());
-echo "<br>";
-$a = "1000";
-$b = "+1000";
-if ($a == $b) echo "1";
-if ($a === $b) echo "2";
-echo "<br>";
-$thisnum = 0;
-while($thisnum < 10)
-{
-	$thisnum += 1;
-	echo "This nums is now " . $thisnum;
-	echo "<br>";
-}
-echo "<br>";
-$counter = 1;
-while($counter <= 10)
-{
-	echo $counter . " raised to 2 = " . $counter * $counter ."<br>";
-	$counter++;
-}
-
-echo "<br>";
-$a = 11;
-$b = 27;
-echo $a/$b . " -- " . (int)($a/$b);
-echo "<br>";
-echo "<br>";
-
-$name_array = array("MriDul","mUraLeEdhaRAN","SandY","DesIRE","tACO","fRIdaY");
-echo fix_name($name_array);
-function fix_name(&$arr)
-{
-	$counter1 = 0;
-	$arrcount = count($arr);
-	while($counter1 < $arrcount){
-		echo ucfirst(strtolower($arr[$counter1]));
-		echo "<br>";
-		$counter1 += 1;
-	}
-}
-
-echo "<br>";
-echo "<br>";
-
-if (function_exists("fix_name"))
-{
-	echo "It's there";
-}
-echo "<br>";
-echo phpversion();
-echo "<br>";
-
-class Person
-{
-	public $name, $age, $gender;
-
-	function display_person(){
-		echo "Name = ".$name;
-		echo "<br>";
-		echo "Age = ".$age;
-		echo "<br>";
-		echo "Gender = ".$gender;
-		echo "<br>";
-	}
-}
-$person = new Person;
-$person->name = "Mridul";
-$person->age = 28;
-$person->gender = "Male";
-echo "<br>";
-print_r($person);
-echo "<br>";
-
-
-?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="assets/webicon.png"/>
+  <link rel="stylesheet" type="text/css" href="resources/css/bootstrap.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Main Page</title>
+  <style>
+    .pheading1{
+      text-align: center;
+      margin-top: 1.5em;
+    }
+    .pdiv1{
+      margin-left: 10em;
+      margin-top: 2em;
+      margin-right: 10em;
+    }
+  </style>
+</head>
+  <body>
+    <h2 class="pheading1">Add Contact Details</h2>
+    <div class="pdiv1">
+      <form action="addcontact.php" method="post">
+        <div class="form-group row">
+          <label for="first-name" class="col-sm-2 col-form-label" style="font-weight:bold">First Name</label>
+          <input type="text" class="form-control col-sm-7" name="first-name" placeholder="First Name">
+        </div>
+        <div class="form-group row">
+          <label for="last-name" class="col-sm-2 col-form-label" style="font-weight:bold">Last Name</label>
+          <input type="text" class="form-control col-sm-7" name="last-name" placeholder="Last Name">
+        </div>
+        <div class="form-group row">
+          <label for="emailid" class="col-sm-2 col-form-label" style="font-weight:bold">Email</label>
+          <input type="text" class="form-control col-sm-7" name="emailid" placeholder="abc@site.com">
+        </div>
+        <div class="form-group row">
+          <label for="comments" class="col-sm-2 col-form-label" style="font-weight:bold">Comment</label>
+          <textarea name="comments" class="form-control col-sm-7" style="height:100px" placeholder="Describe your experience"></textarea>
+        </div>
+        <div class="form-group row">
+          <div class="offset-sm-2">
+            <button type="submit" name="submitbtn" class="btn btn-primary">Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
