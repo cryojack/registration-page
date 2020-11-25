@@ -1501,6 +1501,11 @@ pre code {
   }
 }
 
+td {
+  table-layout: fixed;
+  word-wrap: break-all;
+}
+
 .table {
   width: 100%;
   margin-bottom: 1rem;
