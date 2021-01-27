@@ -11,7 +11,7 @@ if (isset($_POST['register-btn'])) {
   $password = $_POST['password'];
   $re_password = $_POST['re-password'];
 
-  $user_id = generateUid($connectDB,$uid);
+  $user_id = generateUid($connectDB);
 
   if (isFieldEmpty($login_name,$first_name,$last_name,$email_id,$password,$re_password) === true) {
     header("Location: ../index.php?error=emptyFields");

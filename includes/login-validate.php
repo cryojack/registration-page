@@ -1,5 +1,6 @@
 <?php
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 // All functions to validate the user at login
 if (isset($_POST['login-btn'])) {
 
@@ -14,7 +15,7 @@ if (isset($_POST['login-btn'])) {
     exit();
   }
 
-  if (isUsernameValid($login_id) === false) {
+  if (isLoginNameValid($login_id) === false) {
     header("Location: ../login.php?error=usernameInvalid");
     exit();
   }
