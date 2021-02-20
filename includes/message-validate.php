@@ -53,6 +53,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       sendMessage($connectDB,$send_msg_user,$send_msg_title,$send_msg_body);
     }
   }
+  
+  if (isset($_POST['delete-msg-btn'])) {
+    $message_id = $_GET["id"];
+    deleteMessage($connectDB,$message_id);
+  }
 }
 else{
     header("Location: ../welcome.php?error=sqlerror");

@@ -152,6 +152,16 @@ function isLoginNameValid($lgname) {
   return $result;
 }
 
+function formatDate($datetime) {
+  if ($datetime === NULL) {
+    return "Not logged in";
+  } else {
+    $tempD = strtotime($datetime);
+    $formatDateTime = date("l, jS F, Y, H:i", $tempD);
+    return $formatDateTime;
+  }
+}
+
 function loginUser($conn,$lgname,$pass) {
   $sql = "SELECT * FROM users WHERE login_name = ? OR email_id = ?;";
   $stmt = $conn->prepare($sql);
@@ -167,10 +177,11 @@ function loginUser($conn,$lgname,$pass) {
       $_SESSION["fname"] = $row["first_name"];
       $_SESSION["lname"] = $row["last_name"];
       $_SESSION["email"] = $row["email_id"];
-      $_SESSION["date_cr"] = $row["date_created"];
-      $_SESSION["date_up"] = $row["date_updated"];
+      $_SESSION["date_cr"] = formatDate($row["date_created"]);
+      $_SESSION["date_up"] = formatDate($row["date_updated"]);
       $_SESSION["prf_pic"] = $row["profile_pic_path"];
       $_SESSION["prf_msg"] = $row["profile_message"];
+      getMessageCount($conn,$_SESSION["uid"]);
       $sql = "UPDATE users SET last_login = NOW() WHERE user_id = ?;";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param('i',$_SESSION["uid"]);
@@ -181,10 +192,16 @@ function loginUser($conn,$lgname,$pass) {
         if ($stmt->execute()) {
           $res = $stmt->get_result();
           $row = $res->fetch_assoc();
-          $_SESSION["date_lg"] = $row["last_login"];
+          $_SESSION["date_lg"] = formatDate($row["last_login"]);
         }
       }
-      header("Location: ../welcome.php");
+      if ($_SESSION["lgname"] === "ADMIN") {
+        $_SESSION["user_count"] = getTotalUserCount($conn);
+        $_SESSION["msg_total"] = getTotalMsgCount($conn);
+        header("Location: ../dashboard.php");
+      } else {
+        header("Location: ../welcome.php");
+      }
     }
     else {
       header("Location: ../login.php?error=incorrectPassword");
@@ -261,7 +278,7 @@ function updateDetails($conn,$fname,$lname,$email) {
       $_SESSION["fname"] = $row["first_name"];
       $_SESSION["lname"] = $row["last_name"];
       $_SESSION["email"] = $row["email_id"];
-      $_SESSION["date_up"] = $row["date_updated"];
+      $_SESSION["date_up"] = formatDate($row["date_updated"]);
     }
     header("Location: ../update-profile.php?error=updateDetailSuccess");
   } else {
@@ -282,7 +299,7 @@ function updatePassword($conn,$newpass) {
     if ($stmt->execute()) {
       $res = $stmt->get_result();
       $row = $res->fetch_assoc();
-      $_SESSION["date_up"] = $row["date_updated"];
+      $_SESSION["date_up"] = formatDate($row["date_updated"]);
     }
     header("Location: ../update-profile.php?error=passwordChanged");
   } else {
@@ -435,7 +452,7 @@ function getRecipientID($conn,$send_user) {
   return $r_uid;
 }
 
-function getSenderName($conn,$send_id) {
+function getSenderLoginName($conn,$send_id) {
   $s_name;
   $sql = "SELECT login_name FROM users WHERE user_id = ?;";
   $stmt = $conn->prepare($sql);
@@ -448,6 +465,33 @@ function getSenderName($conn,$send_id) {
     header("Location: ../inbox.php?error=sqlerror");
   }
   return $s_name;
+}
+
+function getSenderFullName($conn,$send_id) {
+  $f_name;
+  $sql = "SELECT first_name,last_name FROM users WHERE user_id = ?;";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('i',$send_id);
+  if ($stmt->execute()) {
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc();
+    $f_name = $row["first_name"] . ' ' . $row["last_name"];
+  } else {
+    header("Location: ../inbox.php?error=sqlerror");
+  }
+  return $f_name;
+}
+
+function getMessageCount($conn,$uid) {
+  $is_d = 'N';
+  $sql = "SELECT COUNT(*) as msg_count FROM messages WHERE recipient_id = ? AND is_deleted = ?;";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('is',$uid,$is_d);
+  if ($stmt->execute()) {
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc();
+    $_SESSION["msg_count"] = $row["msg_count"];
+  }
 }
 
 function sendMessage($conn,$send_user,$send_title,$send_body) {
@@ -478,19 +522,110 @@ function sendMessage($conn,$send_user,$send_title,$send_body) {
 
 function displayMessages($conn,$uid) {
   $is_d = 'N';
-  $sql = "SELECT sender_id,msg_title,msg_content,date_sent FROM messages WHERE recipient_id = ? AND is_deleted = ?;";
+  $sql = "SELECT msg_id,sender_id,msg_title,msg_content,date_sent FROM messages WHERE recipient_id = ? AND is_deleted = ? ORDER BY date_sent DESC;";
   $stmt = $conn->prepare($sql);
   $stmt->bind_param('is',$uid,$is_d);
   if ($stmt->execute()) {
     $res = $stmt->get_result();
-    while (($row = $res->fetch_assoc()) > 0) {
+    while ($row = $res->fetch_assoc()) {
       echo '<div class="form-group col-sm-9">';
       echo '<div class="card">';
       echo '<div class="card-body p-1" style="outline:solid black 1px">';
-      echo '<h4><b>' . $row['sender_id'] . '</b></h4>';
+      echo '<form action="includes/message-validate.php?id=' . $row['msg_id'] . '" method="post">';
+      echo '<h4><b>' . getSenderFullName($conn,$row['sender_id']) . '</b> (' . getSenderLoginName($conn,$row['sender_id']) . ')</h4>';
       echo '<h4>' . $row['msg_title'] . '</h4>';
       echo '<h5>' . $row['msg_content'] . '</h5>';
-      echo '<h6><i>' . $row['msg_date'] . '</i></h6>';
+      echo '<h6 class = "float-left"><i>Sent on - ' . formatDate($row['date_sent']) . '</i></h6>';
+      echo '<button type="submit" name="delete-msg-btn" class="btn btn-secondary fa fa-trash float-right"/>';
+      echo '</form>';
+      echo '</div>';
+      echo '</div>';
+      echo '</div>';
+    }
+  }
+}
+
+function deleteMessage($conn,$msg_id) {
+  $is_d = 'Y';
+  $sql = "UPDATE messages SET is_deleted = ? WHERE msg_id = ?;";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('ss',$is_d,$msg_id);
+  if ($stmt->execute()) {
+    getMessageCount($conn,$_SESSION["uid"]);
+    header("Location: ../inbox.php?error=messageDeleted");
+  } else {
+    header("Location: ../inbox.php?error=sqlerror");
+  }
+}
+
+// Administrator functions
+
+function getTotalUserCount($conn) {
+  $user_count;
+  $sql = "SELECT COUNT(*) AS user_count FROM users WHERE user_id > 000000000050;";
+  $stmt = $conn->prepare($sql);
+  //$stmt->bind_param();
+  if ($stmt->execute()) {
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc();
+    $user_count = $row["user_count"];
+  }
+  return $user_count;
+}
+
+function getTotalMsgCount($conn) {
+  $msg_total;
+  $sql = "SELECT COUNT(*) AS msg_total FROM messages;";
+  $stmt = $conn->prepare($sql);
+  //$stmt->bind_param();
+  if ($stmt->execute()) {
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc();
+    $msg_total = $row["msg_total"];
+  }
+  return $msg_total;
+}
+
+function displayAllMessages($conn) {
+  $is_d = 'N';
+  $sql = "SELECT msg_id,sender_id,msg_title,msg_content,date_sent FROM messages ORDER BY date_sent DESC;";
+  $stmt = $conn->prepare($sql);
+  if ($stmt->execute()) {
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+      echo '<div class="form-group col-sm-9">';
+      echo '<div class="card">';
+      echo '<div class="card-body p-1" style="outline:solid black 1px">';
+      echo '<form action="includes/message-validate.php?id=' . $row['msg_id'] . '" method="post">';
+      echo '<h6 class = "float-right">Message ID - ' . $row['msg_id'] . '</h6>';
+      echo '<h4><b>' . getSenderFullName($conn,$row['sender_id']) . '</b> (' . getSenderLoginName($conn,$row['sender_id']) . ')</h4>';
+      echo '<h4>' . $row['msg_title'] . '</h4>';
+      echo '<h5>' . $row['msg_content'] . '</h5>';
+      echo '<h6 class = "float-left"><i>Sent on - ' . formatDate($row['date_sent']) . '</i></h6>';
+      echo '<button type="submit" name="adm-delete-msg-btn" class="btn btn-secondary fa fa-trash float-right"/>';
+      echo '</form>';
+      echo '</div>';
+      echo '</div>';
+      echo '</div>';
+    }
+  }
+}
+
+function displayAllUsers($conn) {
+  $sql = "SELECT user_id,login_name,first_name,last_name FROM users WHERE user_id > 000000000050 ORDER BY date_created DESC;";
+  $stmt = $conn->prepare($sql);
+  if ($stmt->execute()) {
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+      echo '<div class="form-group col-sm-9">';
+      echo '<div class="card">';
+      echo '<div class="card-body p-1" style="outline:solid black 1px">';
+      echo '<form action="includes/user-validate.php?id=' . $row['user_id'] . '" method="post">';
+      echo '<h4><b>' . $row['first_name'] . ' ' . $row['last_name'] . '</b> (' . $row['login_name'] . ')</h4>';
+      echo '<button type="submit" name="adm-view-usr-btn" class="btn btn-secondary fa fa-eye float-right"/>';
+      echo '<button type="submit" name="adm-delete-usr-btn" class="btn btn-secondary fa fa-trash float-right"/>';
+      echo '<button type="submit" name="adm-update-usr-btn" class="btn btn-secondary fa fa fa-pencil float-right"/>';
+      echo '</form>';
       echo '</div>';
       echo '</div>';
       echo '</div>';

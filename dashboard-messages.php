@@ -1,9 +1,13 @@
 <?php
-
 session_start();
 
 if (!isset($_SESSION["IS_LOGGED_IN"])) {
-  header("Location: ../login.php");
+  header("Location: ../login.php?error=noaccess");
+  exit();
+}
+
+if ($_SESSION["lgname"] !== "ADMIN") {
+  header("Location: ../welcome.php?error=noaccess");
   exit();
 }
 
@@ -32,11 +36,7 @@ if (!isset($_SESSION["IS_LOGGED_IN"])) {
     <?php include_once "includes/navbar.php"; ?>
     <div class="container">
       <div class="card-body p-0">
-        <div class="form-group row">
-          <div class="offset-5">
-            <a href="send-message.php" class="btn btn-primary">Create new message</a>
-          </div>
-        </div>
+        
         <?php
         if ($_GET["error"] === "messageDeleted") {
           echo "<p class='form-group row justify-content-center text-success' style='font-style:italic'>Message deleted!</p>";
@@ -47,7 +47,7 @@ if (!isset($_SESSION["IS_LOGGED_IN"])) {
         ?>
         <div class="row justify-content-center">
           <?php
-          include_once "includes/show-message.php";
+          include_once "includes/message-dashboard.php";
           ?>
         </div>
         </div>
@@ -55,3 +55,4 @@ if (!isset($_SESSION["IS_LOGGED_IN"])) {
     </div>
   </body>
 </html>
+f

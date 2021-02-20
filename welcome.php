@@ -48,7 +48,7 @@ if (!isset($_SESSION["IS_LOGGED_IN"])) {
         <div class="col-sm-6" >
           <div class="card-body">
             <h3>Welcome <b><?php echo $_SESSION["fname"] . " " . $_SESSION["lname"] ?></b>!</h3>
-            <h4>You have <b><?php echo $_SESSION["no_of_msg"] ?></b> new messages!</h4>
+            <h4>You have <a href="inbox.php"><b><?php echo $_SESSION["msg_count"] ?></b></a> messages!</h4>
           </div>
         </div>
       </div>

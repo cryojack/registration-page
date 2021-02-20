@@ -1,7 +1,7 @@
 <?php
-$file = "../assets/dbpass.txt";
-$DBPASS;
-
+//$file = "../assets/dbpass.txt";
+$DBPASS = "system123";
+/*
 if (file_exists($file)) {
   $handle = fopen($file, "r") or die("Cannot open file");
   $contents = fread($handle,filesize($file));
@@ -11,7 +11,7 @@ if (file_exists($file)) {
 else {
   echo "File not found!";
 }
-
+*/
 $servername = "localhost";
 $dbusername = "root";
 $dbpassword = $DBPASS;
