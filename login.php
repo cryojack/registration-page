@@ -17,6 +17,7 @@ if (isset($_SESSION["IS_LOGGED_IN"]) && $_SESSION["IS_LOGGED_IN"] === true) {
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="resources/js/demo-page.js"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -56,6 +57,9 @@ if (isset($_SESSION["IS_LOGGED_IN"]) && $_SESSION["IS_LOGGED_IN"] === true) {
             }
             elseif ($_GET["error"] === "sqlerror") {
               echo "<p class='text-danger form-group row justify-content-center' style='font-style:italic'>Something went wrong! Try again later!</p>";
+            }
+            elseif ($_GET["error"] === "userBanned") {
+              echo "<p class='text-danger form-group row justify-content-center' style='font-style:italic'>User is banned!</p>";
             }
           }
           ?>

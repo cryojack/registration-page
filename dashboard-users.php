@@ -16,13 +16,14 @@ if ($_SESSION["lgname"] !== "ADMIN") {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Your Inbox</title>
+  <title>Users Dashboard</title>
   <link rel="icon" href="assets/webicon.png"/>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="resources/js/demo-page.js"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -38,8 +39,8 @@ if ($_SESSION["lgname"] !== "ADMIN") {
       <div class="card-body p-0">
         
         <?php
-        if ($_GET["error"] === "messageDeleted") {
-          echo "<p class='form-group row justify-content-center text-success' style='font-style:italic'>Message deleted!</p>";
+        if ($_GET["error"] === "userDeleteSuccess") {
+          echo "<p class='form-group row justify-content-center text-success' style='font-style:italic'>User successfully deleted!</p>";
         }
         if ($_GET["error"] === "sqlerror") {
           echo "<p class='form-group row justify-content-center text-danger' style='font-style:italic'>Something went wrong, try again later!</p>";

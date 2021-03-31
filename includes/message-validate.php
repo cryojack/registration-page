@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     deleteMessage($connectDB,$message_id);
   }
 }
-else{
+else {
     header("Location: ../welcome.php?error=sqlerror");
   }
 
