@@ -3,8 +3,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 //All functions to validate the user and generate a unique 12 digit ID
 
-include_once "../resources/js/demo-page.js";
-
 function isFieldEmpty($lgname,$fname,$lname,$email,$pass,$re_pass) {
   $result;
   if(empty($lgname) || empty($fname) || empty($lname) || empty($email) || empty($pass) || empty($re_pass)) {
@@ -116,20 +114,149 @@ function generateUid($conn) {
   return $uid;
 }
 
-function createUser($conn,$uid,$lgname,$fname,$lname,$email,$password) {
+function createUser($conn,$conn2,$uid,$lgname,$fname,$lname,$email,$password) {
   $sql = "INSERT INTO users (user_id,login_name,first_name,last_name,email_id,password) VALUES (?,?,?,?,?,?);";
   $password_hashed = password_hash($password, PASSWORD_DEFAULT);
   $stmt = $conn->prepare($sql);
   $stmt->bind_param('isssss',$uid,$lgname,$fname,$lname,$email,$password_hashed);
   if ($stmt->execute()) {
-    header("Location: ../index.php?error=registerSuccess");
-  }
-  else {
+    if(createUserImgTable($conn,$conn2,$uid) === true) {
+      header("Location: ../index.php?error=registerSuccess");
+    }
+  } else {
     header("Location: ../index.php?error=sqlerror");
   }
   $conn->close();
+  $conn2->close();
 }
 
+// User image gallery functions
+
+function createUserImgTable($conn,$conn2,$uid) {
+  $sql = "CREATE TABLE IF NOT EXISTS `$uid` (
+    img_id VARCHAR(12) PRIMARY KEY NOT NULL,
+    img_title TEXT NOT NULL,
+    img_desc TEXT NOT NULL,
+    img_path VARCHAR(255) NOT NULL,
+    date_uploaded DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_deleted ENUM('Y','N') NOT NULL
+  );";
+  $stmt = $conn2->prepare($sql);
+  if ($stmt->execute()) {
+    if (createUserImgDir($conn,$uid) === true) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
+function createUserImgDir($conn,$uid) {
+  $img_dir = "../data/images/general-pics/" . $uid;
+  if (!file_exists($img_dir)) {
+    if (mkdir($img_dir)) {
+      $sql = "UPDATE users SET img_gallery_path = ? WHERE user_id = ?;";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param('si',$img_dir,$uid);
+      if ($stmt->execute()) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
+function generateImgId($conn,$uid) {
+  $img_uid;
+  do {
+    $img_uid = strtoupper(bin2hex(random_bytes(6)));
+    $sql = "SELECT img_id FROM `$uid` WHERE img_id = ?;";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('s',$img_uid);
+    if ($stmt->execute()) {
+      $rows = $stmt->get_result();
+    }
+  } while ($rows->num_rows != 0);
+  return $img_uid;
+}
+
+/*
+This function will copy the uploaded file to the destination folder with the
+same name as the user's ID and place an entry in a table with the same name as the 
+user_id in the demo-page-gallery DB.
+*/
+function uploadGalleryPic($conn,$uid,$up_f_name,$up_f_tmpname,$img_title,$img_desc) {
+  if (empty($img_desc)) {
+    $img_desc = "NO DESCRIPTION GIVEN";
+  }
+  $is_del = 'N';
+  $img_id = generateImgId($conn,$uid);
+  $file_name = $img_id;
+  $img_dir = $_SESSION["img_path"] . "/";
+  $file_ext = pathinfo($up_f_name, PATHINFO_EXTENSION);
+  $new_file = $img_dir . $file_name . "." . $file_ext;
+  if (move_uploaded_file($up_f_tmpname, $new_file)) {
+    resizeImage($new_file,2);
+    $sql = "INSERT INTO `$uid` (img_id,img_title,img_desc,img_path,is_deleted) VALUES (?,?,?,?,?);";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('sssss',$img_id,$img_title,$img_desc,$new_file,$is_del);
+    if ($stmt->execute()) {
+      header("Location: ../upload-image.php?error=imgUploadSuccess");
+    } else {
+      header("Location: ../upload-image.php?error=imgUploadFailed");
+    }
+  } else {
+    header("Location: ../upload-image.php?error=imgMoveFailed");
+  }
+}
+
+function showUserImages($conn,$uid) {
+  $is_del = 'N';
+  $sql = "SELECT * FROM `$uid` WHERE is_deleted = ?;";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('s',$is_del);
+  if ($stmt->execute()) {
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+      echo '<div class="form-group col-md-4">';
+      echo '<div class="card">';
+      echo '<div class="card-body p-1 text-center">';
+      echo '<form action="includes/user-img-validate.php?id=' . $_SESSION["uid"] . '" method="post">';
+      echo '<img src = "'. $row['img_path'] .'" alt="'.$row['img_title'].'">';
+      echo '</form>';
+      echo '</div>';
+      echo '</div>';
+      echo '<div class="row justify-content-center">';
+      echo '<h4>'. $row['img_title'] .'</h4>';
+      echo '</div>';
+      echo '<div class="row justify-content-center">';
+      echo '<h5>'. $row['img_desc'] .'</h5>';
+      echo '</div>';
+      echo '</div>';
+    }
+  }
+}
+/*
+<div class="col-sm-3">
+  <div class="card">
+    <div class="card-body text-center">
+      <?php
+        echo '<img src = "'. $_SESSION['prf_pic'] .'" alt="Your Profile Pic">';
+      ?>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <h4>Profile Photo</h4>
+  </div>
+</div>
+*/
 // Login functions
 
 function isLoginEmpty($lgname,$pass) {
@@ -187,6 +314,7 @@ function loginUser($conn,$lgname,$pass) {
         $_SESSION["date_up"] = formatDate($row["date_updated"]);
         $_SESSION["prf_pic"] = $row["profile_pic_path"];
         $_SESSION["prf_msg"] = $row["profile_message"];
+        $_SESSION["img_path"] = $row["img_gallery_path"];
         getMessageCount($conn,$_SESSION["uid"]);
         $sql = "UPDATE users SET last_login = NOW() WHERE user_id = ?;";
         $stmt = $conn->prepare($sql);
@@ -340,7 +468,7 @@ function isImgTypeCorrect($up_f_name) {
   return $result;
 }
 
-function resizeImage($img_file) {
+function resizeImage($img_file,$rdir_const) {
   $new_file = $img_file;
   $img_details = getimagesize($img_file);
   $orig_width = $img_details[0];
@@ -361,7 +489,12 @@ function resizeImage($img_file) {
     imagepng($temp_img, $new_file, 9);
   }
   else {
-    header("Location: ../update-profile.php?error=imgResizeError");
+    if ($rdir_const === 1) {
+      header("Location: ../update-profile.php?error=imgResizeError");
+    }
+    elseif ($rdir_const === 2) {
+      header("Location: ../upload-image.php?error=imgResizeError");
+    }
   }
 }
 
@@ -370,7 +503,7 @@ function uploadProfilePic($conn,$up_f_name,$up_f_tmpname) {
   $file_ext = pathinfo($up_f_name, PATHINFO_EXTENSION);
   $new_file = $img_dir . $_SESSION["uid"] . "." . $file_ext;
   if (move_uploaded_file($up_f_tmpname, $new_file)) {
-    resizeImage($new_file);
+    resizeImage($new_file,1);
     $sql = "UPDATE users SET profile_pic_path = ? WHERE user_id = ?;";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('si',$new_file,$_SESSION["uid"]);
@@ -664,7 +797,7 @@ function showUserDetails($conn,$uid) {
     }
     echo '</div>
         </div>
-        <div class="row justify-content-center">
+        <div class="justify-content-center">
           <h4>Profile Photo</h4>
         </div>
         </div>
@@ -832,15 +965,10 @@ function admUpdateUsrDetails($conn,$uid,$fname_up,$lname_up,$email_up) {
   }
   $conn->close();
 }
-function admUpdateUsrPassword() {
-  
-}
-function admUpdateUsrProfilePic() {
-  
-}
-function admDeleteUsrProfilePic() {
-  
-}
+
+function admUpdateUsrPassword(){}
+function admUpdateUsrProfilePic(){}
+function admDeleteUsrProfilePic(){}
 
 function deleteUser($conn,$uid) {
   $sql = "DELETE FROM users WHERE user_id = ?;";

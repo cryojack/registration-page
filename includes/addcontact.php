@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 
 if (isset($_POST['register-btn'])) {
   include_once "dbconn.php";
@@ -50,7 +53,7 @@ if (isset($_POST['register-btn'])) {
   }
 
   else {
-    createUser($connectDB,$user_id,$login_name,$first_name,$last_name,$email_id,$password);
+    createUser($connectDB,$connectDB2,$user_id,$login_name,$first_name,$last_name,$email_id,$password);
   }
 }
 else {

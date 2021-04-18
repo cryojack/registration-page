@@ -1,9 +1,8 @@
 <?php
-
 session_start();
 
 if (!isset($_SESSION["IS_LOGGED_IN"])) {
-  header("Location: ../login.php");
+  header("Location: ../login.php?error=noaccess");
   exit();
 }
 
@@ -12,7 +11,7 @@ if (!isset($_SESSION["IS_LOGGED_IN"])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Your Inbox</title>
+  <title>Image Gallery</title>
   <link rel="icon" href="assets/webicon.png"/>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -23,32 +22,18 @@ if (!isset($_SESSION["IS_LOGGED_IN"])) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<style media="screen">
-  #msg-txtarea {
-    resize: none;
-    font-size: 20px;
-  }
-</style>
 <body class="bg-light">
   <?php include_once "includes/navbar.php"; ?>
   <div class="container">
     <div class="card-body p-0">
       <div class="form-group row">
         <div class="offset-5">
-          <a href="send-message.php" class="btn btn-primary">Create new message</a>
+          <a href="upload-image.php" class="btn btn-primary">Upload image</a>
         </div>
       </div>
-      <?php
-      if ($_GET["error"] === "messageDeleted") {
-        echo "<p class='form-group row justify-content-center text-success' style='font-style:italic'>Message deleted!</p>";
-      }
-      if ($_GET["error"] === "sqlerror") {
-        echo "<p class='form-group row justify-content-center text-danger' style='font-style:italic'>Something went wrong, try again later!</p>";
-      }
-      ?>
       <div class="row justify-content-center">
         <?php
-        include_once "includes/show-message.php";
+        include_once "includes/show-images.php";
         ?>
       </div>
     </div>

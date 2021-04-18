@@ -20,6 +20,7 @@ session_start();
           echo "<div class='navbar-nav ml-auto'>";
           echo "<a href='profile.php' class='nav-item nav-link'>Profile</a>";
           echo "<a href='inbox.php' class='nav-item nav-link'>Inbox</a>";
+          echo "<a href='gallery.php' class='nav-item nav-link'>Gallery</a>";
           echo "<a href='includes/logout.php' class='nav-item nav-link'>Logout</a>";
           echo "</div>";
         }
@@ -29,6 +30,7 @@ session_start();
           echo "<a href='dashboard.php' class='nav-item nav-link'>Dashboard</a>";
           echo "<a href='profile.php' class='nav-item nav-link'>Profile</a>";
           echo "<a href='inbox.php' class='nav-item nav-link'>Inbox</a>";
+          echo "<a href='gallery.php' class='nav-item nav-link'>Gallery</a>";
           echo "<a href='includes/logout.php' class='nav-item nav-link'>Logout</a>";
           echo "</div>";
         }

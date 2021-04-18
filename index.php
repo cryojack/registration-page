@@ -14,6 +14,7 @@ if (isset($_SESSION["IS_LOGGED_IN"])) {
   <link rel="icon" href="assets/webicon.png"/>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="resources/css/demo-page-style.css">
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -25,10 +26,10 @@ if (isset($_SESSION["IS_LOGGED_IN"])) {
     <?php include_once "includes/navbar.php"; ?>
     <div class="container">
       <div class="card-body p-0">
-        <form action="includes/addcontact.php" method="post">
+        <form id="registerForm" action="includes/addcontact.php" method="post">
           <div class="form-group row justify-content-center">
             <label for="login-name" class="col-sm-3 col-form-label" style="font-weight:bold">Login Name</label>
-            <input type="text" class="form-control col-sm-5" name="login-name" placeholder="Login Name">
+            <input type="text" class="form-control col-sm-5" id="loginName" name="login-name" placeholder="Login Name">
           </div>
           <?php
           if (isset($_GET["error"])) {
@@ -42,15 +43,15 @@ if (isset($_SESSION["IS_LOGGED_IN"])) {
           ?>
           <div class="form-group row justify-content-center">
             <label for="first-name" class="col-sm-3 col-form-label" style="font-weight:bold">First Name</label>
-            <input type="text" class="form-control col-sm-5" name="first-name" placeholder="First Name">
+            <input type="text" class="form-control col-sm-5" id="firstName" name="first-name" placeholder="First Name">
           </div>
           <div class="form-group row justify-content-center">
             <label for="last-name" class="col-sm-3 col-form-label" style="font-weight:bold">Last Name</label>
-            <input type="text" class="form-control col-sm-5" name="last-name" placeholder="Last Name">
+            <input type="text" class="form-control col-sm-5" id="lastName" name="last-name" placeholder="Last Name">
           </div>
           <div class="form-group row justify-content-center">
             <label for="emailid" class="col-sm-3 col-form-label" style="font-weight:bold">Email</label>
-            <input type="text" class="form-control col-sm-5" name="emailid" placeholder="abc@site.com">
+            <input type="text" class="form-control col-sm-5" id="emailid" name="emailid" placeholder="abc@site.com">
           </div>
           <?php
           if (isset($_GET["error"])) {
@@ -64,7 +65,7 @@ if (isset($_SESSION["IS_LOGGED_IN"])) {
           ?>
           <div class="form-group row justify-content-center">
             <label for="password" class="col-sm-3 col-form-label" style="font-weight:bold">Password</label>
-            <input type="password" class="form-control col-sm-5" name="password" placeholder="Enter Password">
+            <input type="password" class="form-control col-sm-5" id="password" name="password" placeholder="Enter Password">
           </div>
           <?php
           if ($_GET["error"] === "invalidPassword") {
@@ -73,7 +74,7 @@ if (isset($_SESSION["IS_LOGGED_IN"])) {
           ?>
           <div class="form-group row justify-content-center">
             <label for="re-password" class="col-sm-3 col-form-label" style="font-weight:bold">Confirm Password</label>
-            <input type="password" class="form-control col-sm-5" name="re-password" placeholder="Re-enter Password">
+            <input type="password" class="form-control col-sm-5" id="passwordRepeat" name="re-password" placeholder="Re-enter Password">
           </div>
           <?php
           if (isset($_GET["error"])) {
@@ -93,7 +94,7 @@ if (isset($_SESSION["IS_LOGGED_IN"])) {
           ?>
           <div class="form-group row">
             <div class="offset-5">
-              <button type="submit" name="register-btn" class="btn btn-primary">Register Now</button>
+              <button type="submit" id="registerBtnIndex" name="register-btn" class="btn btn-primary" onclick="return validateRegForm()">Register Now</button>
             </div>
           </div>
         </form>
@@ -101,3 +102,5 @@ if (isset($_SESSION["IS_LOGGED_IN"])) {
     </div>
   </body>
 </html>
+
+

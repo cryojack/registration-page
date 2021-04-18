@@ -33,27 +33,25 @@ if ($_SESSION["lgname"] !== "ADMIN") {
     font-size: 20px;
   }
 </style>
-  <body class="bg-light">
-    <?php include_once "includes/navbar.php"; ?>
-    <div class="container">
-      <div class="card-body p-0">
-        
+<body class="bg-light">
+  <?php include_once "includes/navbar.php"; ?>
+  <div class="container">
+    <div class="card-body p-0">
+      <?php
+      if ($_GET["error"] === "userDeleteSuccess") {
+        echo "<p class='form-group row justify-content-center text-success' style='font-style:italic'>User successfully deleted!</p>";
+      }
+      if ($_GET["error"] === "sqlerror") {
+        echo "<p class='form-group row justify-content-center text-danger' style='font-style:italic'>Something went wrong, try again later!</p>";
+      }
+      ?>
+      <div class="row justify-content-center">
         <?php
-        if ($_GET["error"] === "userDeleteSuccess") {
-          echo "<p class='form-group row justify-content-center text-success' style='font-style:italic'>User successfully deleted!</p>";
-        }
-        if ($_GET["error"] === "sqlerror") {
-          echo "<p class='form-group row justify-content-center text-danger' style='font-style:italic'>Something went wrong, try again later!</p>";
-        }
+        include_once "includes/users-dashboard.php";
         ?>
-        <div class="row justify-content-center">
-          <?php
-          include_once "includes/users-dashboard.php";
-          ?>
-        </div>
-        </div>
       </div>
     </div>
-  </body>
+  </div>
+</div>
+</body>
 </html>
-f
