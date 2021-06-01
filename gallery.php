@@ -1,4 +1,6 @@
 <?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 session_start();
 
 if (!isset($_SESSION["IS_LOGGED_IN"])) {
@@ -31,6 +33,16 @@ if (!isset($_SESSION["IS_LOGGED_IN"])) {
           <a href="upload-image.php" class="btn btn-primary">Upload image</a>
         </div>
       </div>
+      <?php
+      if (isset($_GET["error"])) {
+        if ($_GET["error"] === "imageDeleted") {
+          echo "<p class='form-group row justify-content-center text-success' style='font-style:italic'>Image deleted!</p>";
+        }
+        if ($_GET["error"] === "sqlerror") {
+          echo "<p class='form-group row justify-content-center text-danger' style='font-style:italic'>Something went wrong, try again later!</p>";
+        }
+      }
+      ?>
       <div class="row justify-content-center">
         <?php
         include_once "includes/show-images.php";

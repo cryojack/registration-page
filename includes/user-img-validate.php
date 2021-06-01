@@ -25,10 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($upload_img_title)) {
       header("Location: ../upload-image.php?error=noTitleGiven");
     }
-    
-    //elseif (empty($upload_img_desc)) {
-      //$upload_img_desc = "NO DESCRIPTION GIVEN";
-    //}
 
     elseif (empty($upload_img_size)) {
       header("Location: ../upload-image.php?error=noImagePresent");
@@ -58,6 +54,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       */
       uploadGalleryPic($connectDB2,$_SESSION["uid"],$upload_img_name,$upload_img_tmp,$upload_img_title,$upload_img_desc);
     }
+  }
+  
+  if (isset($_POST['usr-delete-img-btn'])) {
+    $img_id = $_GET["id"];
+    deleteGalleryPic($connectDB2,$_SESSION["uid"],$img_id);
   }
 }
 else {

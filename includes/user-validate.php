@@ -228,8 +228,12 @@ function showUserImages($conn,$uid) {
       echo '<div class="form-group col-md-4">';
       echo '<div class="card">';
       echo '<div class="card-body p-1 text-center">';
-      echo '<form action="includes/user-img-validate.php?id=' . $_SESSION["uid"] . '" method="post">';
+      echo '<form action="includes/user-img-validate.php?id=' . $row['img_id'] . '" method="post">';
       echo '<img src = "'. $row['img_path'] .'" alt="'.$row['img_title'].'">';
+      echo '<div class="row justify-content-center">';
+      echo '<button type="submit" name="usr-view-img-btn" class="btn btn-secondary fa fa-eye float-left"/>';
+      echo '<button type="submit" name="usr-delete-img-btn" class="btn btn-secondary fa fa-trash float-left"/>';
+      echo '</div>';
       echo '</form>';
       echo '</div>';
       echo '</div>';
@@ -243,20 +247,18 @@ function showUserImages($conn,$uid) {
     }
   }
 }
-/*
-<div class="col-sm-3">
-  <div class="card">
-    <div class="card-body text-center">
-      <?php
-        echo '<img src = "'. $_SESSION['prf_pic'] .'" alt="Your Profile Pic">';
-      ?>
-    </div>
-  </div>
-  <div class="row justify-content-center">
-    <h4>Profile Photo</h4>
-  </div>
-</div>
-*/
+
+function deleteGalleryPic($conn,$uid,$img_id) {
+  $is_d = 'Y';
+  $sql = "UPDATE `$uid` SET is_deleted = ? WHERE img_id = ?;";
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param('ss',$is_d,$img_id);
+  if ($stmt->execute()) {
+    header("Location: ../gallery.php?error=imageDeleted");
+  } else {
+    header("Location: ../gallery.php?error=sqlerror");
+  }
+}
 // Login functions
 
 function isLoginEmpty($lgname,$pass) {
